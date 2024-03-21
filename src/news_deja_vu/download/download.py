@@ -12,6 +12,7 @@ indicated dataset. The function also ensures that the downloaded data is saved t
 
 import os
 import requests
+from typing import Tuple
 
 from .american_stories import parse_american_stories_args, download_american_stories
 
@@ -23,7 +24,7 @@ DOWNLOAD_MAP = {
     'american stories': download_american_stories
 }
 
-def parse_download_string(download_string: str) -> tuple[callable, dict, str]:
+def parse_download_string(download_string: str) -> Tuple[callable, dict, str]:
     """
     Parse the download string into a tuple containing the dataset function, args to that funciton, and the default save folder.
 
@@ -44,13 +45,18 @@ def parse_download_string(download_string: str) -> tuple[callable, dict, str]:
     args, default_save_folder = PARSER_MAP[dataset](download_string.split(':')[1:])
     download_function = DOWNLOAD_MAP[dataset]
     
-    return download_function, args, default_save_folder 
+    return download_function, args, os.path.join('data', default_save_folder)
 
 
 def download(dataset: str, save_folder: str | os.PathLike = None):
+    '''
+    download the indicated dataset to the indicated save folder
+    '''
 
+    # Get params and download function
     fetcher, args, default_save_folder = parse_download_string(dataset)
     
+    # Override the default save folder if one is provided
     save_folder = save_folder or default_save_folder
 
     fetcher(save_folder, **args)

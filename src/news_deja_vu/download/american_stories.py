@@ -34,6 +34,9 @@ def parse_american_stories_args(args: list) -> dict:
     year_range_regex = re.compile(r'^\d{4}-\d{4}$')
     for arg in args:
         if years_specified_regex.match(arg):
+            if 'years' in args:
+                raise ValueError('Cannot specify multiple sets of years for American Stories dataset. Specify as :year,year,year:')
+            
             args['years'] = []
             for year in arg.split(','):
                 year = int(year)
@@ -44,10 +47,15 @@ def parse_american_stories_args(args: list) -> dict:
                     args['years'].append(year)
 
         elif year_range_regex.match(arg):
+            if 'year_range' in args:
+                raise ValueError('Cannot specify multiple year ranges for American Stories dataset. Specify as :start_year-end_year:')
+            
             start_year, end_year = map(int, arg.split('-'))
             if start_year < MIN_AMERICAN_STORIES_YEAR or end_year > MAX_AMERICAN_STORIES_YEAR:
                 raise ValueError(f'Year range {start_year}-{end_year} is out of range for American Stories dataset, \
                                  which only contains articles from {MIN_AMERICAN_STORIES_YEAR} to {MAX_AMERICAN_STORIES_YEAR}.')
+            elif start_year >= end_year:
+                raise ValueError(f'Invalid year range: {start_year}-{end_year}. Start year must be less than end year.')
             else:
                 args['year_range'] = (start_year, end_year)
         
@@ -71,9 +79,31 @@ def download_american_stories(save_folder: str | os.PathLike, **kwargs):
 
     Args:
     - save_folder: the folder in which to save the downloaded data
+    - kwargs: a dictionary of args for the American Stories download function
     """
-    url = 'https://www.kaggle.com/snapcrack/all-the-news/download'
-    response = requests.get(url)
-    with open(save_folder, 'wb') as file:
-        file.write(response.content)
-    return
+    import huggingface_hub
+
+    REPO_ID = 'dell-research-harvard/AmericanStories'
+    
+    # Get the embeddings arg
+    embeddings = kwargs.get('embeddings', False)
+
+    if embeddings:
+        raise NotImplementedError('Embeddings are not yet available for the American Stories dataset.')
+    
+    # Get the years arg
+    years = kwargs.get('years', [])
+    year_range = kwargs.get('year_range', None)
+
+    download_files = []
+    for year in years:
+        download_files.append(f'faro_{year}.tar.gz')
+
+    if year_range:
+        for year in range(year_range[0], year_range[1]+1):
+            download_files.append(f'faro_{year}.tar.gz')
+
+    # Download the files
+    for file in download_files:
+        huggingface_hub.download_from_hf_hub(REPO_ID, file, repo_type='dataset', cache_dir = save_folder)
+
