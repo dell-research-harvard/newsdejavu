@@ -15,8 +15,8 @@ here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
-    name="news_deja_vu",  # Required
+    name="newsdejavu",  # Required
     version="0.0.1",  # Required
-    packages=find_packages(where="src"),  # Required
-    python_requires=">=3.7, <4",
+    packages=find_packages(where="src", exclude=['test']),  # Required
+    python_requires=">=3.7, <4"
 )

@@ -1,6 +1,7 @@
 ###Use NER models on Huggingface/local path to predict entities in the text
 
-from transformers import pipeline
+from transformers import pipeline, AutoModelForTokenClassification, AutoTokenizer
+
 import datetime
 import numpy as np
 
@@ -14,29 +15,36 @@ sentences=["I am John Doe and I live in New York. I work at Google. I am a Softw
                       "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
                       "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
                       "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",]
-###Note that we want the output to be in the format (tuple) words,entity_labels
-
-
-                            
-                            
-##Now, we want to parse the output to get the words and entity labels
-def parse_output_return_labels(ner_pipeline_output):
-    words=[]
-    labels=[]
-    for i in range(len(ner_pipeline_output)):
-        words.append(ner_pipeline_output[i]['word'])
-        labels.append(ner_pipeline_output[i]['entity_group'])
-    return words,labels
-
-
 
 model_path="/mnt/122a7683-fa4b-45dd-9f13-b18cc4f4a187/thisdayinhistory/models"
+
+model=AutoModelForTokenClassification.from_pretrained(model_path)
+tokenizer=AutoTokenizer.from_pretrained(model_path,use_fast=True,return_tensors="pt",max_length=256,truncation=True)
+
 token_classifier = pipeline(task="ner" ,
-                            model=model_path,
+                            model=model, tokenizer=tokenizer,
                             aggregation_strategy="max",ignore_labels = [],
                             batch_size=2)
 
-def handle_punctuation_for_mask(word):
+def handle_punctuation_for_generic_mask(word):
+    """If punctuation comes before the word, return it before the mask, ow return it after the mask"""
+    
+    if word[0] in [".",",","!","?"]:
+        return word[0]+" [MASK]"
+    elif word[-1] in [".",",","!","?"]:
+        return "[MASK]"+word[-1]
+    else:
+        return "[MASK]"
+
+def handle_punctuation_for_entity_mask(word,entity_group):
+    """If punctuation comes before the word, return it before the mask, ow return it after the mask"""
+    
+    if word[0] in [".",",","!","?"]:
+        return word[0]+" "+entity_group
+    elif word[-1] in [".",",","!","?"]:
+        return entity_group+word[-1]
+    else:
+        return entity_group
     
     
 def replace_words_with_entity_tokens(ner_output_dict,  
@@ -47,11 +55,14 @@ def replace_words_with_entity_tokens(ner_output_dict,
      Replace words with entity tokens. Reconstruct the sentence but mask the word with it's entity group (if the entity group is desired) and return the sentence 
     """
     if not all_masks_same:
-        new_word_list=[subdict["word"] if subdict["entity_group"] not in desired_labels else subdict["entity_group"] for subdict in ner_output_dict]
+        new_word_list=[subdict["word"] if subdict["entity_group"] not in desired_labels else handle_punctuation_for_entity_mask(subdict["word"],subdict["entity_group"]) for subdict in ner_output_dict]
     else:
-        new_word_list=[subdict["word"] if subdict["entity_group"] not in desired_labels else "[MASK]" for subdict in ner_output_dict]
+        new_word_list=[subdict["word"] if subdict["entity_group"] not in desired_labels else handle_punctuation_for_generic_mask(subdict["word"]) for subdict in ner_output_dict]
 
     return " ".join(new_word_list)
 
-print((token_classifier(sentences[:1])))
-# print(replace_words_with_entity_tokens(token_classifier(sentence),all_masks_same=False)),print(replace_words_with_entity_tokens(token_classifier(sentence),all_masks_same=True))
+
+
+
+print(len(token_classifier(sentences[:2])))
+print(replace_words_with_entity_tokens(token_classifier(sentence),all_masks_same=False)),print(replace_words_with_entity_tokens(token_classifier(sentence),all_masks_same=True))

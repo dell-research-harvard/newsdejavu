@@ -5,7 +5,7 @@ Unit tests for download functions.
 import os
 import pytest
 
-from news_deja_vu import download, parse_download_string
+from newsdejavu import download, parse_download_string
 
 def test_parse_download_string_american_stories():
     '''
