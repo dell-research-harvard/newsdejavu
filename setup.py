@@ -1,22 +1,17 @@
-"""A setuptools based setup module.
-
-See:
-https://packaging.python.org/guides/distributing-packages-using-setuptools/
-https://github.com/pypa/sampleproject
-"""
-
-# Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 import pathlib
 
+# The directory containing this file
 here = pathlib.Path(__file__).parent.resolve()
 
-# Get the long description from the README file
+# The text of the README file
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
+# This call to setup() does all the work
 setup(
-    name="newsdejavu",  # Required
-    version="0.0.1",  # Required
-    packages=find_packages(where="src", exclude=['test']),  # Required
-    python_requires=">=3.7, <4"
+    name="newsdejavu",  # Required: the name of the package
+    version="0.0.1",  # Required: the version of the package
+    package_dir={"": "src"},  # Optional: tells setuptools that packages are under src
+    packages=find_packages(where="src", exclude=["test*"]),  # Required: the packages to include
+    python_requires=">=3.7, <4",  # Required: the Python version compatibility
 )
