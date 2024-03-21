@@ -4,7 +4,10 @@ from transformers import pipeline, AutoModelForTokenClassification, AutoTokenize
 
 import datetime
 import numpy as np
+from tqdm import tqdm
 
+
+from utils import clean_text
 
 sentence = "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian"
 
