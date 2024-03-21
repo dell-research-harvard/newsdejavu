@@ -14,4 +14,14 @@ setup(
     package_dir={"": "src"},  # Optional: tells setuptools that packages are under src
     packages=find_packages(where="src", exclude=["test*"]),  # Required: the packages to include
     python_requires=">=3.7, <4",  # Required: the Python version compatibility
+    install_requires=[  # Optional: a list of dependencies needed to use the package
+        "numpy",
+        "pandas",
+        "torch",
+        "requests",
+        "Pillow>=10.0.1,<=15.0",
+        "transformers",
+        
+        # Add other dependencies as needed
+    ],
 )

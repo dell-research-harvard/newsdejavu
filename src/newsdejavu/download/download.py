@@ -44,11 +44,11 @@ def parse_download_string(download_string: str) -> Tuple[callable, dict, str]:
     
     args, default_save_folder = PARSER_MAP[dataset](download_string.split(':')[1:])
     download_function = DOWNLOAD_MAP[dataset]
-    
+    print(args, default_save_folder)
     return download_function, args, os.path.join('data', default_save_folder)
 
 
-def download(dataset: str, save_folder: str | os.PathLike = None):
+def download(dataset: str, save_folder: str = None):
     '''
     download the indicated dataset to the indicated save folder
     '''
