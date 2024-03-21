@@ -64,6 +64,7 @@ def parse_american_stories_args(args: list) -> dict:
 
     return args, default_save_folder
 
+
 def download_american_stories(save_folder: str | os.PathLike, **kwargs):
     """
     Download the American Stories dataset and save it to the indicated folder.
