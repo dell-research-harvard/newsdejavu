@@ -3,84 +3,61 @@
 
 import os
 import pytest
+import shutil
+import json
 
 from newsdejavu import ner, mask, ner_and_mask
+from newsdejavu import download
 
+json.encoder.FLOAT_REPR = lambda o: format(o, '.7f' )
 
-def test_ner():
+@pytest.fixture
+def sample_sentences():
+    return ["I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
+            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
+            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
+            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
+            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
+            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
+            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",]
+
+model = "/mnt/122a7683-fa4b-45dd-9f13-b18cc4f4a187/thisdayinhistory/models"
+batch_size = 10
+
+class TestSimpleNER:
     
-
-    sentences=["I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",]
-
-    model="/mnt/122a7683-fa4b-45dd-9f13-b18cc4f4a187/thisdayinhistory/models"
-
-    ner_output=ner(sentences,model,batch_size=10)
-    assert len(ner_output)==len(sentences)
     
-def test_mask():
- 
-    sentences=["I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",]
-
-    model="/mnt/122a7683-fa4b-45dd-9f13-b18cc4f4a187/thisdayinhistory/models"
-
-    ner_output=ner(sentences,model,batch_size=10)
-    masked_sentences=mask(ner_output)
-    assert len(masked_sentences)==len(sentences)
+    def test_ner(self, sample_sentences):
+        ner_output=ner(sample_sentences, model, batch_size = batch_size)
+        print(ner_output)
+        with open('data/ner_test_output/ner_output.json', 'w') as f:
+            json.dump(ner_output, f, indent=4)
+        assert len(ner_output) == len(sample_sentences)
     
-def test_ner_and_mask():
+    def test_mask(self, sample_sentences):
+        ner_output = ner(sample_sentences, model, batch_size = batch_size)
+        masked_sentences = mask(ner_output)
+        assert len(masked_sentences) == len(sample_sentences)
 
-    sentences=["I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",]
+    def test_ner_and_mask(self, sample_sentences):
+        masked_sentences = ner_and_mask(sample_sentences, model, batch_size = batch_size)
+        assert len(masked_sentences) == len(sample_sentences)    
 
-    model="/mnt/122a7683-fa4b-45dd-9f13-b18cc4f4a187/thisdayinhistory/models"
-
-    masked_sentences=ner_and_mask(sentences,model,batch_size=10)
-    assert len(masked_sentences)==len(sentences)
-
+    def test_ner_and_mask_diff_masks(self, sample_sentences):
+        masked_sentences = ner_and_mask(sample_sentences, model, batch_size = batch_size, all_masks_same = False)
+        assert len(masked_sentences) == len(sample_sentences)
     
-def test_ner_and_mask_diff_masks():
+    def test_ner_and_mask_clean_ocr(self, sample_sentences):
+        masked_sentences = ner_and_mask(sample_sentences, model, batch_size = batch_size, preprocess_for_ocr_errors = True)
+        assert len(masked_sentences) == len(sample_sentences)
 
-    sentences=["I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",]
 
-    model="/mnt/122a7683-fa4b-45dd-9f13-b18cc4f4a187/thisdayinhistory/models"
+class TestDownloadNER:
 
-    masked_sentences=ner_and_mask(sentences,model,batch_size=10,all_masks_same=False)
-    assert len(masked_sentences)==len(sentences)
+    def test_download_ner(self):
+        download_string = 'american stories:1798'
+        download(download_string)
+        assert os.path.isdir('data/american_stories_1798')
+        ner('data/american_stories_1798', model, batch_size = batch_size)
 
-def test_ner_and_mask_clean_ocr():
-
-    sentences=["I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-            "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",
-                        "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian",]
-
-    model="/mnt/122a7683-fa4b-45dd-9f13-b18cc4f4a187/thisdayinhistory/models"
-
-    masked_sentences=ner_and_mask(sentences,model,batch_size=10,preprocess_for_ocr_errors=True)
-    assert len(masked_sentences)==len(sentences)
+        shutil.rmtree('data/american_stories_1798')

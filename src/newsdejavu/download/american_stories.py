@@ -5,6 +5,7 @@ Download function for American Stories dataset.
 import os
 import requests
 import re
+from datasets import load_dataset
 
 MIN_AMERICAN_STORIES_YEAR = 1774
 MAX_AMERICAN_STORIES_YEAR = 1963
@@ -96,16 +97,11 @@ def download_american_stories(save_folder: str, **kwargs):
     # Get the years arg
     years = kwargs.get('years', [])
     year_range = kwargs.get('year_range', None)
-
-    download_files = []
-    for year in years:
-        download_files.append(f'faro_{year}.tar.gz')
-
     if year_range:
-        for year in range(year_range[0], year_range[1]+1):
-            download_files.append(f'faro_{year}.tar.gz')
-
+        years = list(range(year_range[0], year_range[1]+1))
+    
     # Download the files
-    for file in download_files:
-        huggingface_hub.hf_hub_download(REPO_ID, file, repo_type='dataset', cache_dir = save_folder)
+    dataset = load_dataset("dell-research-harvard/AmericanStories", "subset_years_content_regions", year_list = years)
+    dataset.save_to_disk(os.path.join(save_folder, 'data.hf'))
+
 

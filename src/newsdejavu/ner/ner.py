@@ -11,8 +11,8 @@ from newsdejavu.utils.clean_text import clean_ocr_text
 
 
 
-def ner(sentences: List[str], model_path: str, batch_size: int = 1,
-                    max_length: int = 256, torch_device: str = "cuda:0" if torch.cuda.is_available() else "cpu") -> List[dict]:
+def ner(sentences, model_path: str, batch_size: int = 1,
+        max_length: int = 256, torch_device: str = "cuda:0" if torch.cuda.is_available() else "cpu") -> List[dict]:
     """
     Processes a list of sentences to identify and tag named entities using a specified model.
 
@@ -27,12 +27,18 @@ def ner(sentences: List[str], model_path: str, batch_size: int = 1,
         List[dict]: A list of dictionaries containing the NER output for each sentence.
     """
     
+    
     model=AutoModelForTokenClassification.from_pretrained(model_path)
-    tokenizer=AutoTokenizer.from_pretrained(model_path,use_fast=True,return_tensors="pt",max_length=max_length,truncation=True)
+    print("Loaded ner model")
+    tokenizer=AutoTokenizer.from_pretrained(model_path, return_tensors="pt",
+                                            max_length=max_length, truncation=True)
+    print("Loaded tokenizer")
+    
     token_classifier = pipeline(task="ner" ,
                                 model=model, tokenizer=tokenizer,
-                                aggregation_strategy="max",ignore_labels = [],
-                                batch_size=batch_size,device=torch_device)
+                                aggregation_strategy="max", ignore_labels = [],
+                                batch_size=batch_size, device=torch_device)
+    
     return token_classifier(sentences)
 
 def handle_punctuation_for_generic_mask(word):

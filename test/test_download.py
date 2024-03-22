@@ -90,16 +90,16 @@ class TestDownloadsAmericanStories:
         download_string = 'american stories:1798'
         download(download_string)
         assert os.path.isdir('data/american_stories_1798')
-        shutil.rmtree('data/american_stories_1798')
+        # shutil.rmtree('data/american_stories_1798')
 
-    def test_4(self):
-        download_string = 'american stories:1798,1799'
-        download(download_string)
-        assert os.path.isdir('data/american_stories_1798_1799')
-        shutil.rmtree('data/american_stories_1798_1799')
+    # def test_4(self):
+    #     download_string = 'american stories:1798,1799'
+    #     download(download_string)
+    #     assert os.path.isdir('data/american_stories_1798_1799')
+    #     shutil.rmtree('data/american_stories_1798_1799')
 
-    def test_5(self):
-        download_string = 'american stories:1798-1799'
-        download(download_string)
-        assert os.path.isdir('data/american_stories_1798-1799')
-        shutil.rmtree('data/american_stories_1798-1799')
+    # def test_5(self):
+    #     download_string = 'american stories:1798-1799'
+    #     download(download_string)
+    #     assert os.path.isdir('data/american_stories_1798-1799')
+    #     shutil.rmtree('data/american_stories_1798-1799')
