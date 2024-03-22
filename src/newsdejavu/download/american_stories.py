@@ -6,6 +6,7 @@ import os
 import requests
 import re
 from datasets import load_dataset
+import json
 
 MIN_AMERICAN_STORIES_YEAR = 1774
 MAX_AMERICAN_STORIES_YEAR = 1963
@@ -100,8 +101,23 @@ def download_american_stories(save_folder: str, **kwargs):
     if year_range:
         years = list(range(year_range[0], year_range[1]+1))
     
-    # Download the files
-    dataset = load_dataset("dell-research-harvard/AmericanStories", "subset_years_content_regions", year_list = years)
-    dataset.save_to_disk(os.path.join(save_folder, 'data.hf'))
+    years = list(map(str, years))
 
+    # Remove years that already have a downloaded dataset
+    if os.path.exists(save_folder):
+        downloaded_years = [f.split('_')[-1] for f in os.listdir(save_folder)]
+        years = [year for year in years if year not in downloaded_years]
+    
+    if years:
+        # Download the files
+        dataset = load_dataset("dell-research-harvard/AmericanStories", year_list = years)
+
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder)
+        
+        for year in years:
+            dataset[year].to_json(os.path.join(save_folder, f'dataset_{year}.json'))
+                     
+    print([os.path.join(save_folder, f'dataset_{year}.json') for year in years])
+    return load_dataset("json", data_files = [os.path.join(save_folder, f'dataset_{year}.json') for year in years])['train']
 

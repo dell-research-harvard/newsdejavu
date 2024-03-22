@@ -7,11 +7,12 @@ import datetime
 import numpy as np
 from tqdm import tqdm
 import torch
-from newsdejavu.utils.clean_text import clean_ocr_text
+from ..utils import clean_ocr_text, get_dataset
 
 
 
-def ner(sentences, model_path: str, batch_size: int = 1,
+
+def ner(dataset, model_path: str, batch_size: int = 1,
         max_length: int = 256, torch_device: str = "cuda:0" if torch.cuda.is_available() else "cpu") -> List[dict]:
     """
     Processes a list of sentences to identify and tag named entities using a specified model.
@@ -30,16 +31,19 @@ def ner(sentences, model_path: str, batch_size: int = 1,
     
     model=AutoModelForTokenClassification.from_pretrained(model_path)
     print("Loaded ner model")
+
     tokenizer=AutoTokenizer.from_pretrained(model_path, return_tensors="pt",
                                             max_length=max_length, truncation=True)
     print("Loaded tokenizer")
-    
     token_classifier = pipeline(task="ner" ,
                                 model=model, tokenizer=tokenizer,
                                 aggregation_strategy="max", ignore_labels = [],
                                 batch_size=batch_size, device=torch_device)
     
-    return token_classifier(sentences)
+
+    dataset = get_dataset(dataset)
+    inputs = dataset['article']
+    return token_classifier(inputs)
 
 def handle_punctuation_for_generic_mask(word):
     """If punctuation comes before the word, return it before the mask, ow return it after the mask"""

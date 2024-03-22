@@ -5,6 +5,7 @@ Unit tests for download functions.
 import os
 import pytest
 import shutil
+from datasets import Dataset
 
 
 from newsdejavu import download, parse_download_string
@@ -87,10 +88,11 @@ class TestDownloadsAmericanStories:
             download(download_string)
 
     def test_3(self):
-        download_string = 'american stories:1798'
-        download(download_string)
-        assert os.path.isdir('data/american_stories_1798')
-        # shutil.rmtree('data/american_stories_1798')
+        download_string = 'american stories:1870'
+        dataset = download(download_string)
+        print(type(dataset))
+        assert os.path.isdir('data/american_stories_1870')
+        assert isinstance(dataset, Dataset)
 
     # def test_4(self):
     #     download_string = 'american stories:1798,1799'

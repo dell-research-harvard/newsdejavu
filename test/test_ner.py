@@ -5,6 +5,7 @@ import os
 import pytest
 import shutil
 import json
+from datasets import load_dataset, Dataset
 
 from newsdejavu import ner, mask, ner_and_mask
 from newsdejavu import download
@@ -25,7 +26,6 @@ model = "/mnt/122a7683-fa4b-45dd-9f13-b18cc4f4a187/thisdayinhistory/models"
 batch_size = 10
 
 class TestSimpleNER:
-    
     
     def test_ner(self, sample_sentences):
         ner_output=ner(sample_sentences, model, batch_size = batch_size)
@@ -52,12 +52,9 @@ class TestSimpleNER:
         assert len(masked_sentences) == len(sample_sentences)
 
 
-class TestDownloadNER:
+class TestDatasetNER:
 
-    def test_download_ner(self):
-        download_string = 'american stories:1798'
-        download(download_string)
-        assert os.path.isdir('data/american_stories_1798')
-        ner('data/american_stories_1798', model, batch_size = batch_size)
-
-        shutil.rmtree('data/american_stories_1798')
+    def test_american_stories_ner(self):
+        dataset = load_dataset('json', data_files = 'data/test_data/american_stories_1870_test.json')['train']
+        assert isinstance(dataset, Dataset)
+        ner(dataset, model, batch_size = batch_size)

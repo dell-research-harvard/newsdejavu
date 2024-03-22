@@ -22,7 +22,19 @@ def create_dataset_from_list_of_file_paths(file_paths: list) -> Dataset:
     '''
     Create a huggingface dataset from a list of file paths.
     '''
-    
+    pass
+
+def create_dataset_from_list_of_dicts(dicts: list) -> Dataset:
+    '''
+    Create a huggingface dataset from a list of dictionaries.
+    '''
+    return Dataset.from_list(dicts)
+
+def create_dataset_from_list_of_texts(texts: list) -> Dataset:
+    '''
+    Create a huggingface dataset from a list of texts.
+    '''
+    return Dataset.from_dict({'text': texts})
 
 def create_dataset_from_directory(directory: str) -> Dataset:
     '''
@@ -53,7 +65,7 @@ def create_dataset_from_dataframe(dataframe: pd.DataFrame) -> Dataset:
         raise ValueError('Unrecognized pandas dataframe type, must contain a column named "text" or "files"')
 
 
-def create_dataset(dataset):
+def get_dataset(dataset):
     '''
     Create a huggingface dataset from a variety of input types.
     '''
@@ -79,6 +91,9 @@ def create_dataset(dataset):
     
     elif isinstance(dataset, pd.Series):
         return create_dataset_from_series(dataset)
+    
+    elif isinstance(dataset, Dataset):
+        return dataset
     
     else:
         raise ValueError('Unrecognized input type')
