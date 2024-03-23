@@ -139,5 +139,23 @@ class TestQueryPipeline:
         with open('data/test_data/query_results.json', 'w') as f:
             json.dump(results_dict, f, indent = 4)
 
-    def test_american_stories_query_high_level(self):
-        
+    def test_american_stories_query_full(self):
+        dataset = download('american stories:1840')
+        assert isinstance(dataset, Dataset)
+        output = ner_and_mask(dataset, local_ner_model, batch_size = batch_size)
+        assert len(output) == len(dataset)
+        embeddings = embed(output, same_story_local_model)
+        assert embeddings.shape[0] == len(dataset)
+
+        query_masked_input = ner_and_mask(sample_query_sentences, local_ner_model, batch_size = batch_size)
+        query_embeddings = embed(query_masked_input, same_story_local_model)
+
+        dist_list, nn_list = find_nearest_neighbours(query_embeddings, embeddings, k=1)
+        assert dist_list.shape[0] == len(sample_query_sentences)
+        assert nn_list.shape[0] == len(sample_query_sentences)
+
+        results_dict = {i: {"query": sample_query_sentences[i], "neighbor": dataset[nn_list[i]]} for i in range(len(sample_query_sentences))}
+        assert len(results_dict) == len(sample_query_sentences)
+
+        with open('data/test_data/query_results_1840.json', 'w') as f:
+            json.dump(results_dict, f, indent = 4, default=str)
