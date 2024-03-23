@@ -25,8 +25,5 @@ setup(
         "Pillow>=10.0.1,<=15.0",
         "transformers",
         "sentence_transformers",
-
-        
-        # Add other dependencies as needed
     ],
 )
