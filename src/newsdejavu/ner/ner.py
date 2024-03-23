@@ -13,7 +13,8 @@ from ..utils import clean_ocr_text, get_dataset
 
 
 def ner(dataset, model_path: str, batch_size: int = 1,
-        max_length: int = 256, torch_device: str = "cuda:0" if torch.cuda.is_available() else "cpu") -> List[dict]:
+        max_length: int = 256, torch_device: str = "cuda:0" if torch.cuda.is_available() else "cpu",
+        preprocess_for_ocr_errors: bool = False) -> List[dict]:
     """
     Processes a list of sentences to identify and tag named entities using a specified model.
 
@@ -43,6 +44,10 @@ def ner(dataset, model_path: str, batch_size: int = 1,
 
     dataset = get_dataset(dataset)
     inputs = dataset['article']
+
+    if preprocess_for_ocr_errors:
+        inputs = [clean_ocr_text(i, True, ["#","/","*","@","~","¢","©","®","°"])[0] for i in inputs]
+
     return token_classifier(inputs)
 
 def handle_punctuation_for_generic_mask(word):
@@ -131,11 +136,10 @@ def ner_and_mask(sentences: List[str], model_path: str, batch_size: int = 1, max
         >>> masked_sentences = ner_and_mask(sentences, model_path)
         >>> print(masked_sentences)
         ["[PER] works at [ORG] in [LOC]."]
-    """
-    if preprocess_for_ocr_errors:
-        sentences=[clean_ocr_text(i,True,["#","/","*","@","~","¢","©","®","°"])[0] for i in sentences]
-    ner_output_list = ner(sentences,model_path,batch_size,max_length,torch_device)
-    return mask(ner_output_list,labels_to_mask,all_masks_same)
+    """    
+    ner_output_list = ner(sentences, model_path, batch_size, max_length, torch_device, preprocess_for_ocr_errors)
+    
+    return mask(ner_output_list, labels_to_mask, all_masks_same)
 
 
     

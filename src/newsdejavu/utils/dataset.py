@@ -34,7 +34,7 @@ def create_dataset_from_list_of_texts(texts: list) -> Dataset:
     '''
     Create a huggingface dataset from a list of texts.
     '''
-    return Dataset.from_dict({'text': texts})
+    return Dataset.from_dict({'article': texts})
 
 def create_dataset_from_directory(directory: str) -> Dataset:
     '''
@@ -46,9 +46,9 @@ def create_dataset_from_series(series: pd.Series) -> Dataset:
     '''
     Create a huggingface dataset from a pandas series.
     '''
-    if series.name is 'text':
+    if series.name == 'text':
         return Dataset.from_pandas(series)
-    elif series.name is 'files':
+    elif series.name == 'files':
         return create_dataset_from_list_of_file_paths(series)
     else:
         raise ValueError('Unrecognized pandas series type, must be named "text" or "files"')
@@ -78,11 +78,13 @@ def get_dataset(dataset):
     
     elif isinstance(dataset, list):
         if all([isinstance(x, str) for x in dataset]):
-            return create_dataset_from_list_of_file_paths(dataset)
+            if all([os.path.isfile(x) for x in dataset]):
+                return create_dataset_from_list_of_file_paths(dataset)
+            else:
+                return create_dataset_from_list_of_texts(dataset)
+
         elif all([isinstance(x, dict) for x in dataset]):
             return create_dataset_from_list_of_dicts(dataset)
-        elif all([isinstance(x, str) for x in dataset]):
-            return create_dataset_from_list_of_texts(dataset)
         else:
             raise ValueError('Unrecognized list input type')
     
