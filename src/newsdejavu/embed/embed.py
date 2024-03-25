@@ -8,7 +8,7 @@ import pickle
 from newsdejavu.utils.wrangling import find_mask_token, find_sep_token
 
 
-def embed(corpus: Union[List,List[Dict[str, str]]], model: str, save_path: Optional[str] = None) -> np.ndarray:
+def embed(corpus: Union[List,List[Dict[str, str]]], model: str, batch_size: int = 512, save_path: Optional[str] = None) -> np.ndarray:
     """
     Create embeddings from masked sentences in a given corpus using a specified model.
     
@@ -74,7 +74,7 @@ def embed(corpus: Union[List,List[Dict[str, str]]], model: str, save_path: Optio
 
     print("embedding corpus ...")
     sentence_model=SentenceTransformer(model)
-    corpus_embeddings = sentence_model.encode(data, show_progress_bar=True, batch_size=512)
+    corpus_embeddings = sentence_model.encode(data, show_progress_bar=True, batch_size = batch_size)
 
     # Normalize the embeddings to unit length
     corpus_embeddings = corpus_embeddings / np.linalg.norm(corpus_embeddings, axis=1, keepdims=True)

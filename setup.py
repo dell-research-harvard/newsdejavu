@@ -10,7 +10,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 # This call to setup() does all the work
 setup(
     name="newsdejavu",  # Required: the name of the package
-    version="0.0.1",  # Required: the version of the package
+    version="0.0.3",  # Required: the version of the package
     package_dir={"": "src"},  # Optional: tells setuptools that packages are under src
     packages=find_packages(where="src", exclude=["test*"]),  # Required: the packages to include
     python_requires=">=3.9, <4",  # Required: the Python version compatibility
@@ -26,4 +26,6 @@ setup(
         "transformers",
         "sentence_transformers",
     ],
+    long_description=long_description,  # Optional: the long description of the package
+    long_description_content_type="text/markdown",  # Optional: the format of the long description
 )
