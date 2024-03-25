@@ -8,7 +8,7 @@ import pickle
 from newsdejavu.utils.wrangling import find_mask_token, find_sep_token
 
 
-def embed(corpus: Union[List,List[Dict[str, str]]], model: str, batch_size: int = 512, save_path: Optional[str] = None) -> np.ndarray:
+def embed(corpus: Union[List, List[Dict[str, str]]], model: str, batch_size: int = 512, save_path: Optional[str] = None) -> np.ndarray:
     """
     Create embeddings from masked sentences in a given corpus using a specified model.
     
@@ -74,10 +74,10 @@ def embed(corpus: Union[List,List[Dict[str, str]]], model: str, batch_size: int 
 
     print("embedding corpus ...")
     sentence_model=SentenceTransformer(model)
-    corpus_embeddings = sentence_model.encode(data, show_progress_bar=True, batch_size = batch_size)
+    corpus_embeddings = sentence_model.encode(data, show_progress_bar = True, batch_size = batch_size)
 
     # Normalize the embeddings to unit length
-    corpus_embeddings = corpus_embeddings / np.linalg.norm(corpus_embeddings, axis=1, keepdims=True)
+    corpus_embeddings = corpus_embeddings / np.linalg.norm(corpus_embeddings, axis = 1, keepdims = True)
 
     if save_path:
         if not os.path.exists(save_path):
@@ -86,18 +86,3 @@ def embed(corpus: Union[List,List[Dict[str, str]]], model: str, batch_size: int 
             pickle.dump(corpus_embeddings, f)
     
     return corpus_embeddings
-
-
-if __name__ == '__main__':
-
-    corpus_dict = [{"id": 1, "masked_sentence": "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian"},
-                   {"id": 2, "masked_sentence": "I am John Doe and I live in New York. I work at Google. I am a Software Engineer. I am a Nigerian"}]
-
-    # Embed
-    test_ob=embed(
-        corpus_dict,
-        model = "/mnt/122a7683-fa4b-45dd-9f13-b18cc4f4a187/thisdayinhistory/same_story_model",
-        save_path=None
-    )
-    
-    print(test_ob.shape)
