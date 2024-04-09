@@ -6,7 +6,7 @@ News Deja Vu is a novel semantic search tool that leverages transformer large la
 # Example Usage:
 
 ```[python]
-ner_model = 'bert-base-NER'
+ner_model = 'dell-research-harvard/historical_newspaper_ner'
 same_story_model = 'dell-research-harvard/same-story'
 
 # Download historic news articles
